@@ -1,0 +1,97 @@
+[gd_scene load_steps=10 format=3 uid="uid://cekhpcf1ibnk0"]
+
+[ext_resource type="Script" path="res://player.gd" id="1_yf2jm"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_471ee"]
+albedo_color = Color(1, 0.616667, 0, 0.509804)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_q8hio"]
+material = SubResource("StandardMaterial3D_471ee")
+height = 1.0
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_7vvdg"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_jy30g"]
+size = Vector3(1, 0.5, 2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_3blvg"]
+albedo_color = Color(0.882677, 0.333265, 5.77569e-07, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_18w1m"]
+material = SubResource("StandardMaterial3D_3blvg")
+size = Vector3(1, 0.5, 2)
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_es2sa"]
+height = 1.0
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_2aalb"]
+height = 1.0
+radius = 0.6
+
+[node name="Player" type="CharacterBody3D"]
+collision_layer = 2
+collision_mask = 107
+script = ExtResource("1_yf2jm")
+metadata/_edit_group_ = true
+
+[node name="Pivot" type="Node3D" parent="."]
+
+[node name="Character" type="MeshInstance3D" parent="Pivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+mesh = SubResource("CylinderMesh_q8hio")
+
+[node name="TESTDIRECTION" type="MeshInstance3D" parent="Pivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1)
+visible = false
+mesh = SubResource("CapsuleMesh_7vvdg")
+
+[node name="SlideHitbox" type="Area3D" parent="Pivot"]
+collision_layer = 2
+collision_mask = 0
+monitoring = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Pivot/SlideHitbox"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, -1)
+shape = SubResource("BoxShape3D_jy30g")
+disabled = true
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Pivot/SlideHitbox"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, -1)
+visible = false
+mesh = SubResource("BoxMesh_18w1m")
+
+[node name="HurtBox" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 2
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="HurtBox"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+shape = SubResource("CylinderShape3D_es2sa")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+shape = SubResource("CylinderShape3D_es2sa")
+
+[node name="BallDetector" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 4
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="BallDetector"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+shape = SubResource("CylinderShape3D_2aalb")
+
+[node name="SlideCooldown" type="Timer" parent="."]
+process_callback = 0
+one_shot = true
+
+[node name="StunTimer" type="Timer" parent="."]
+process_callback = 0
+wait_time = 1.5
+one_shot = true
+
+[connection signal="area_entered" from="HurtBox" to="." method="_on_hurt_box_area_entered"]
+[connection signal="body_entered" from="BallDetector" to="." method="_on_ball_detector_body_entered"]
+[connection signal="timeout" from="SlideCooldown" to="." method="_on_slide_cooldown_timeout"]
+[connection signal="timeout" from="StunTimer" to="." method="_on_stun_timer_timeout"]
